@@ -22,24 +22,24 @@ use crate::network;
 use crate::screentime::{self, Notified, Tracker};
 use crate::sysinfo::{Sampler, Usage};
 
-pub const BUS_NAME: &str = "org.serpantinum.Core";
-pub const CORE_INTERFACE: &str = "org.serpantinum.Core";
+pub const BUS_NAME: &str = "org.axshell.Core";
+pub const CORE_INTERFACE: &str = "org.axshell.Core";
 pub const SYSINFO_PATH: &str = "/sysinfo";
-pub const SYSINFO_INTERFACE: &str = "org.serpantinum.Core.SysInfo";
+pub const SYSINFO_INTERFACE: &str = "org.axshell.Core.SysInfo";
 pub const LOCKS_PATH: &str = "/locks";
-pub const LOCKS_INTERFACE: &str = "org.serpantinum.Core.Locks";
+pub const LOCKS_INTERFACE: &str = "org.axshell.Core.Locks";
 pub const CLIPBOARD_PATH: &str = "/clipboard";
-pub const CLIPBOARD_INTERFACE: &str = "org.serpantinum.Core.Clipboard";
+pub const CLIPBOARD_INTERFACE: &str = "org.axshell.Core.Clipboard";
 pub const BRIGHTNESS_PATH: &str = "/brightness";
-pub const BRIGHTNESS_INTERFACE: &str = "org.serpantinum.Core.Brightness";
+pub const BRIGHTNESS_INTERFACE: &str = "org.axshell.Core.Brightness";
 pub const IDLE_PATH: &str = "/idle";
-pub const IDLE_INTERFACE: &str = "org.serpantinum.Core.Idle";
+pub const IDLE_INTERFACE: &str = "org.axshell.Core.Idle";
 pub const SCREENTIME_PATH: &str = "/screentime";
-pub const SCREENTIME_INTERFACE: &str = "org.serpantinum.Core.ScreenTime";
+pub const SCREENTIME_INTERFACE: &str = "org.axshell.Core.ScreenTime";
 pub const COMPOSITOR_PATH: &str = "/compositor";
-pub const COMPOSITOR_INTERFACE: &str = "org.serpantinum.Core.Compositor";
+pub const COMPOSITOR_INTERFACE: &str = "org.axshell.Core.Compositor";
 pub const NETWORK_PATH: &str = "/network";
-pub const NETWORK_INTERFACE: &str = "org.serpantinum.Core.Network";
+pub const NETWORK_INTERFACE: &str = "org.axshell.Core.Network";
 const PROPERTIES_INTERFACE: &str = "org.freedesktop.DBus.Properties";
 const MIN_INTERVAL: Duration = Duration::from_millis(100);
 const PRIMING: Duration = Duration::from_millis(250);
@@ -61,7 +61,7 @@ fn emit(bus: &zbus::blocking::Connection, path: &str, interface: &str, changed: 
     }
     let body = (interface, changed, Vec::<&str>::new());
     if let Err(error) = bus.emit_signal(None::<&str>, path, PROPERTIES_INTERFACE, "PropertiesChanged", &body) {
-        eprintln!("serpantinum-core: could not signal a change on {path}: {error}");
+        eprintln!("axshell-core: could not signal a change on {path}: {error}");
     }
 }
 
@@ -296,7 +296,7 @@ impl CompositorFeed {
             let name = session.compositor();
             match compositor::connect(&session) {
                 Some(Ok(adapter)) => self.follow(adapter, &session, bus),
-                Some(Err(error)) => eprintln!("serpantinum-core: cannot follow {name}: {error}"),
+                Some(Err(error)) => eprintln!("axshell-core: cannot follow {name}: {error}"),
                 None => {
                     self.publish(bus, |s| {
                         *s = CompositorState { name: name.to_owned(), ready: true, ..Default::default() }
@@ -341,7 +341,7 @@ impl CompositorFeed {
             let Some(ready) = self.wait_while(session, &adapter.fds()) else { return };
             for index in ready {
                 if let Err(error) = adapter.read(index) {
-                    eprintln!("serpantinum-core: lost {name}: {error}");
+                    eprintln!("axshell-core: lost {name}: {error}");
                     return;
                 }
             }
@@ -533,7 +533,7 @@ impl NetworkFeed {
                 self.leases.wait_interval();
                 if system.is_none() {
                     system = zbus::blocking::Connection::system()
-                        .inspect_err(|e| eprintln!("serpantinum-core: cannot connect to the system bus: {e}"))
+                        .inspect_err(|e| eprintln!("axshell-core: cannot connect to the system bus: {e}"))
                         .ok();
                     if let Some(system) = system.clone() {
                         let follower = system.clone();
@@ -582,7 +582,7 @@ impl NetworkFeed {
             .map(|r| r.build());
         let signals = match rule.and_then(|rule| zbus::blocking::MessageIterator::for_match_rule(rule, system, None)) {
             Ok(signals) => signals,
-            Err(error) => return eprintln!("serpantinum-core: cannot follow NetworkManager: {error}"),
+            Err(error) => return eprintln!("axshell-core: cannot follow NetworkManager: {error}"),
         };
         for message in signals.flatten() {
             let body = message.body();
@@ -606,7 +606,7 @@ impl NetworkFeed {
             .and_then(|p| p.receive_name_owner_changed_with_args(&[(0, network::NM_BUS_NAME)]));
         let owners = match owners {
             Ok(owners) => owners,
-            Err(error) => return eprintln!("serpantinum-core: cannot follow NetworkManager: {error}"),
+            Err(error) => return eprintln!("axshell-core: cannot follow NetworkManager: {error}"),
         };
         for signal in owners {
             let Ok(args) = signal.args() else { continue };
@@ -672,7 +672,7 @@ impl IdleFeed {
             None => bus.emit_signal(None::<&str>, IDLE_PATH, IDLE_INTERFACE, member, &()),
         };
         if let Err(error) = sent {
-            eprintln!("serpantinum-core: could not signal {member}: {error}");
+            eprintln!("axshell-core: could not signal {member}: {error}");
         }
     }
 
@@ -774,7 +774,7 @@ pub const SCREENTIME_VARS: &[&str] = &[
     "QS_SETTINGS",
     "QS_RUN_LOCK",
     "QS_RUN_DIR",
-    "SERPANTINUM_DIR",
+    "AXSHELL_DIR",
     "HOME",
     "LC_ALL",
     "LC_MESSAGES",
@@ -801,10 +801,10 @@ impl ScreenTimePaths {
         ScreenTimePaths {
             run: var("QS_RUN_FOCUSTIME").unwrap_or_else(|| "/tmp/quickshell/focustime".into()),
             db: var("QS_STATE_FOCUSTIME").unwrap_or_else(|| home.join(".local/state/quickshell/focustime")),
-            settings: var("QS_SETTINGS").unwrap_or_else(|| home.join(".config/serpantinum/settings.json")),
-            languages: var("SERPANTINUM_DIR").map(|d| d.join("assets/languages")).unwrap_or_default(),
+            settings: var("QS_SETTINGS").unwrap_or_else(|| home.join(".config/axshell/settings.json")),
+            languages: var("AXSHELL_DIR").map(|d| d.join("assets/languages")).unwrap_or_default(),
             lock_marker: var("QS_RUN_LOCK")
-                .unwrap_or_else(|| var("QS_RUN_DIR").unwrap_or_else(|| runtime.join("serpantinum")).join("lock"))
+                .unwrap_or_else(|| var("QS_RUN_DIR").unwrap_or_else(|| runtime.join("axshell")).join("lock"))
                 .join("locked"),
             home,
         }
@@ -854,7 +854,7 @@ impl ScreenTimeFeed {
             let conn = match screentime::open(&paths.db.join("focustime.db")) {
                 Ok(conn) => conn,
                 Err(error) => {
-                    eprintln!("serpantinum-core: cannot open the screen time database: {error}");
+                    eprintln!("axshell-core: cannot open the screen time database: {error}");
                     self.leases.sleep(SCREENTIME_RETRY);
                     continue;
                 }
@@ -975,7 +975,7 @@ impl ScreenTimeFeed {
 
 pub struct Core;
 
-#[interface(name = "org.serpantinum.Core")]
+#[interface(name = "org.axshell.Core")]
 impl Core {
     fn quit(&self) {
         // Exits once the reply is on its way
@@ -999,7 +999,7 @@ impl SysInfo {
     }
 }
 
-#[interface(name = "org.serpantinum.Core.SysInfo")]
+#[interface(name = "org.axshell.Core.SysInfo")]
 impl SysInfo {
     /// Samples every `interval_ms` (or faster, for another client) until this client unsubscribes
     fn subscribe(&self, #[zbus(header)] header: Header<'_>, interval_ms: u32) -> fdo::Result<()> {
@@ -1066,7 +1066,7 @@ impl SysInfo {
 
 pub struct LockState(pub Arc<LockFeed>);
 
-#[interface(name = "org.serpantinum.Core.Locks")]
+#[interface(name = "org.axshell.Core.Locks")]
 impl LockState {
     fn subscribe(&self, #[zbus(header)] header: Header<'_>, interval_ms: u32) -> fdo::Result<()> {
         self.0.leases.add(&owner(&header)?, interval(interval_ms));
@@ -1091,7 +1091,7 @@ impl LockState {
 
 pub struct BrightnessControl(pub Arc<BrightnessFeed>);
 
-#[interface(name = "org.serpantinum.Core.Brightness")]
+#[interface(name = "org.axshell.Core.Brightness")]
 impl BrightnessControl {
     /// Follows the brightness until this client unsubscribes
     fn subscribe(&self, #[zbus(header)] header: Header<'_>) -> fdo::Result<()> {
@@ -1144,7 +1144,7 @@ impl BrightnessControl {
 
 pub struct Network(pub Arc<NetworkFeed>);
 
-#[interface(name = "org.serpantinum.Core.Network")]
+#[interface(name = "org.axshell.Core.Network")]
 impl Network {
     /// Follows the network until this client unsubscribes
     fn subscribe(&self, #[zbus(header)] header: Header<'_>) -> fdo::Result<()> {
@@ -1180,7 +1180,7 @@ impl Network {
 
 pub struct Idle(pub Arc<IdleFeed>);
 
-#[interface(name = "org.serpantinum.Core.Idle")]
+#[interface(name = "org.axshell.Core.Idle")]
 impl Idle {
     /// Serves org.freedesktop.ScreenSaver until this client unsubscribes. `marker` is the file the
     /// lock screen creates, which lets a held-back sleep go on.
@@ -1258,7 +1258,7 @@ impl ScreenSaver {
 
 pub struct ScreenTime(pub Arc<ScreenTimeFeed>);
 
-#[interface(name = "org.serpantinum.Core.ScreenTime")]
+#[interface(name = "org.axshell.Core.ScreenTime")]
 impl ScreenTime {
     /// Counts focus time until this client unsubscribes. `env` holds the variables of
     /// `SCREENTIME_VARS` and `compositor::SESSION_VARS`; the latest subscriber's are used.
@@ -1276,7 +1276,7 @@ impl ScreenTime {
 
 pub struct Compositor(pub Arc<CompositorFeed>);
 
-#[interface(name = "org.serpantinum.Core.Compositor")]
+#[interface(name = "org.axshell.Core.Compositor")]
 impl Compositor {
     /// Follows the compositor that `session` names until this client unsubscribes. The variables
     /// are those of `compositor::SESSION_VARS`; the latest subscriber's session is followed.
@@ -1324,7 +1324,7 @@ pub struct Clipboard {
     pub home: PathBuf,
 }
 
-#[interface(name = "org.serpantinum.Core.Clipboard")]
+#[interface(name = "org.axshell.Core.Clipboard")]
 impl Clipboard {
     /// A page of the history as a JSON array; images are decoded into `cache_dir`
     async fn list(&self, cache_dir: String, offset: u32, limit: u32) -> String {

@@ -293,7 +293,7 @@ impl Ddc {
 /// The shell's run directory, where the DDC cache lives
 pub fn run_dir() -> PathBuf {
     let env = |name| std::env::var_os(name).filter(|v| !v.is_empty()).map(PathBuf::from);
-    env("QS_RUN_DIR").unwrap_or_else(|| env("XDG_RUNTIME_DIR").unwrap_or_else(|| "/tmp".into()).join("serpantinum"))
+    env("QS_RUN_DIR").unwrap_or_else(|| env("XDG_RUNTIME_DIR").unwrap_or_else(|| "/tmp".into()).join("axshell"))
 }
 
 /// The brightness now, in percent; `None` when there is nothing to read

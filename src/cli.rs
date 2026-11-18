@@ -28,9 +28,9 @@ use crate::dbus::{
 use crate::{launcher, monitors, notify, presets, screentime, system, wallpaper};
 
 pub const USAGE: &str = "\
-Usage: serpantinum-core [COMMAND]
+Usage: axshell-core [COMMAND]
 
-Without a command, runs the daemon in the foreground. It serves org.serpantinum.Core on the
+Without a command, runs the daemon in the foreground. It serves org.axshell.Core on the
 session bus. The commands below start it when it is not running, except quit.
 
 Commands:
@@ -147,11 +147,11 @@ pub fn run(args: &[String]) -> ExitCode {
     match command(args) {
         Ok(()) => ExitCode::SUCCESS,
         Err(Error::Usage(message)) => {
-            eprintln!("serpantinum-core: {message}\n\n{USAGE}");
+            eprintln!("axshell-core: {message}\n\n{USAGE}");
             ExitCode::from(2)
         }
         Err(Error::Failed(message)) => {
-            eprintln!("serpantinum-core: {message}");
+            eprintln!("axshell-core: {message}");
             ExitCode::FAILURE
         }
     }
@@ -467,7 +467,7 @@ fn watch(path: &'static str, interface: &'static str, lease: Lease) -> Result<()
                 start(&restarter)
             };
             if let Err(Error::Failed(message) | Error::Usage(message)) = outcome {
-                eprintln!("serpantinum-core: {message}");
+                eprintln!("axshell-core: {message}");
             }
         }
     });
@@ -539,7 +539,7 @@ fn watch_idle(marker: &str) -> Result<()> {
                 start(&restarter)
             };
             if let Err(Error::Failed(message) | Error::Usage(message)) = outcome {
-                eprintln!("serpantinum-core: {message}");
+                eprintln!("axshell-core: {message}");
             }
         }
     });
@@ -554,7 +554,7 @@ fn watch_idle(marker: &str) -> Result<()> {
             };
             *sleep_lock.lock().unwrap() = Some(on);
             if let Err(error) = proxy.call_method("SetSleepLock", &(on,)) {
-                eprintln!("serpantinum-core: {error}");
+                eprintln!("axshell-core: {error}");
             }
         }
         // The shell closed the pipe, so it is gone
@@ -612,7 +612,7 @@ fn track_screentime() -> Result<()> {
             start(&conn)
         };
         if let Err(Error::Failed(message) | Error::Usage(message)) = outcome {
-            eprintln!("serpantinum-core: {message}");
+            eprintln!("axshell-core: {message}");
         }
     }
     Err(failed("lost the session bus"))
@@ -672,8 +672,8 @@ fn default_cache_dir() -> PathBuf {
     let env = |name| std::env::var_os(name).filter(|v| !v.is_empty()).map(PathBuf::from);
     env("QS_CACHE_CLIPBOARD").unwrap_or_else(|| {
         env("QS_CACHE_DIR")
-            .or_else(|| env("XDG_CACHE_HOME").map(|c| c.join("serpantinum")))
-            .unwrap_or_else(|| env("HOME").unwrap_or_default().join(".cache/serpantinum"))
+            .or_else(|| env("XDG_CACHE_HOME").map(|c| c.join("axshell")))
+            .unwrap_or_else(|| env("HOME").unwrap_or_default().join(".cache/axshell"))
             .join("clipboard")
     })
 }

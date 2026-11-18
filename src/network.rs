@@ -290,7 +290,7 @@ pub struct Watch {
 impl Watch {
     pub fn open() -> Watch {
         let route = Netlink::open(libc::NETLINK_ROUTE, RTMGRP_LINK | RTMGRP_IPV4_IFADDR)
-            .inspect_err(|e| eprintln!("serpantinum-core: cannot follow network links: {e}"))
+            .inspect_err(|e| eprintln!("axshell-core: cannot follow network links: {e}"))
             .ok();
         let nl80211 = Netlink::open(libc::NETLINK_GENERIC, 0)
             .and_then(|socket| nl80211_family(&socket).map(|(family, mlme)| (socket, family, mlme)))

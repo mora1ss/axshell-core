@@ -41,18 +41,18 @@ fn main() -> ExitCode {
             return ExitCode::SUCCESS;
         }
         Some("-V" | "--version") => {
-            println!("serpantinum-core {}", env!("CARGO_PKG_VERSION"));
+            println!("axshell-core {}", env!("CARGO_PKG_VERSION"));
             return ExitCode::SUCCESS;
         }
         Some(_) => return cli::run(&args),
     }
     match run() {
         Ok(Outcome::AlreadyRunning) => {
-            eprintln!("serpantinum-core: {BUS_NAME} is already served on this bus");
+            eprintln!("axshell-core: {BUS_NAME} is already served on this bus");
             ExitCode::SUCCESS
         }
         Err(error) => {
-            eprintln!("serpantinum-core: {error}");
+            eprintln!("axshell-core: {error}");
             ExitCode::FAILURE
         }
     }

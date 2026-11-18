@@ -238,7 +238,7 @@ mod tests {
 
     #[test]
     fn missing_root_means_off() {
-        assert_eq!(read_leds(Path::new("/nonexistent-serpantinum-leds")), Locks::default());
+        assert_eq!(read_leds(Path::new("/nonexistent-axshell-leds")), Locks::default());
     }
 
     fn event(kind: u16, code: u16, value: i32) -> Vec<u8> {

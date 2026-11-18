@@ -1,10 +1,10 @@
 [package]
-name = "serpantinum-core"
-version = "0.6.1"
+name = "axshell-core"
+version = "0.6.2"
 edition = "2024"
-description = "A core of services for Serpantinum shell in Rust."
+description = "A core of services for AxShell in Rust."
 license = "AGPL-3.0-or-later"
-repository = "https://github.com/ilyamiro/serpantinum-core"
+repository = "https://github.com/mora1ss/axshell-core"
 
 [dependencies]
 blocking = "1"

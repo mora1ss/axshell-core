@@ -90,7 +90,7 @@ fn take_inhibitor(system: &zbus::blocking::Connection) -> zbus::Result<OwnedFd> 
         "/org/freedesktop/login1",
         Some("org.freedesktop.login1.Manager"),
         "Inhibit",
-        &("sleep", "Serpantinum", "Lock the screen before sleep", "delay"),
+        &("sleep", "AxShell", "Lock the screen before sleep", "delay"),
     )?;
     let fd: zbus::zvariant::OwnedFd = reply.body().deserialize()?;
     Ok(fd.into())
@@ -125,7 +125,7 @@ impl SleepLock {
             match listen(events.clone()) {
                 Ok(system) => self.system = Some(system),
                 Err(error) => {
-                    eprintln!("serpantinum-core: sleep lock unavailable: {error}");
+                    eprintln!("axshell-core: sleep lock unavailable: {error}");
                     self.retry_at = Some(Instant::now() + RETRY_DELAY);
                     return;
                 }
@@ -135,7 +135,7 @@ impl SleepLock {
             match take_inhibitor(system) {
                 Ok(fd) => self.inhibitor = Some(fd),
                 Err(error) => {
-                    eprintln!("serpantinum-core: sleep lock unavailable: {error}");
+                    eprintln!("axshell-core: sleep lock unavailable: {error}");
                     self.retry_at = Some(Instant::now() + RETRY_DELAY);
                 }
             }

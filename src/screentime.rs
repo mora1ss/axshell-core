@@ -607,7 +607,7 @@ impl Tracker {
             tx.commit()
         };
         if let Err(error) = write(&self.conn) {
-            eprintln!("serpantinum-core: cannot write screen time: {error}");
+            eprintln!("axshell-core: cannot write screen time: {error}");
         }
     }
 }
@@ -670,7 +670,7 @@ pub fn translate(dir: &Path, lang: &str, key: &str, default: &str, vars: &[(&str
 
 pub fn notify(title: &str, body: &str) {
     if let Ok(mut child) = Command::new("notify-send")
-        .args(["-u", "critical", "-a", "Serpantinum", title, body])
+        .args(["-u", "critical", "-a", "AxShell", title, body])
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())

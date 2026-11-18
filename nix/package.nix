@@ -1,8 +1,8 @@
-# serpantinum-core built from this checkout
+# axshell-core built from this checkout
 { pkgs, lib ? pkgs.lib }:
 
 pkgs.rustPlatform.buildRustPackage {
-  pname = "serpantinum-core";
+  pname = "axshell-core";
   version = (lib.importTOML ../Cargo.toml).package.version;
 
   src = lib.fileset.toSource {
@@ -13,15 +13,15 @@ pkgs.rustPlatform.buildRustPackage {
   buildInputs = [ pkgs.sqlite ];
 
   postInstall = ''
-    install -Dm644 assets/org.serpantinum.Core.service $out/share/dbus-1/services/org.serpantinum.Core.service
-    substituteInPlace $out/share/dbus-1/services/org.serpantinum.Core.service --replace-fail @out@ $out
+    install -Dm644 assets/org.axshell.Core.service $out/share/dbus-1/services/org.axshell.Core.service
+    substituteInPlace $out/share/dbus-1/services/org.axshell.Core.service --replace-fail @out@ $out
   '';
 
   meta = {
-    description = "A core of services for Serpantinum shell in Rust";
-    homepage = "https://github.com/ilyamiro/serpantinum-core";
+    description = "A core of services for AxShell in Rust";
+    homepage = "https://github.com/mora1ss/axshell-core";
     license = lib.licenses.agpl3Plus;
-    mainProgram = "serpantinum-core";
+    mainProgram = "axshell-core";
     platforms = lib.platforms.linux;
   };
 }

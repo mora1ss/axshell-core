@@ -63,7 +63,7 @@ pub fn fingerprint_available(pam_dir: &Path) -> bool {
     if !on_path("fprintd-list") && !on_path("fprintd-enroll") {
         return false;
     }
-    let own = pam_dir.join("serpantinum");
+    let own = pam_dir.join("axshell");
     let config = if own.exists() { own } else { pam_dir.join("login") };
     scan(pam_dir, &config, 0)
 }

@@ -33,7 +33,7 @@ impl Fixture {
 
     fn run(&self, args: &[&str]) -> Output {
         let widgets = self.root.path().join("widgets").display().to_string();
-        Command::new(env!("CARGO_BIN_EXE_serpantinum-core"))
+        Command::new(env!("CARGO_BIN_EXE_axshell-core"))
             .arg("presets")
             .arg(args[0])
             .arg(self.presets())

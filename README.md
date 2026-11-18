@@ -1,8 +1,8 @@
-# serpantinum-core
+# axshell-core
 
 A daemon that serves system state, compositor state, network state, brightness, idle inhibition,
 screen time and clipboard history to the
-[Serpantinum](https://github.com/ilyamiro/serpantinum) shell over D-Bus. The same binary is its
+[AxShell](https://github.com/mora1ss/axshell) over D-Bus. The same binary is its
 command line client, which prints everything as JSON, so the shell reads it from one long-running
 process instead of running scripts on a timer. It works on any compositor and needs only a session
 bus. The binary links only glibc.
@@ -10,32 +10,32 @@ bus. The binary links only glibc.
 ## Usage
 
 ```sh
-serpantinum-core start                        # the daemon, in the background
-serpantinum-core sysinfo                      # one sample
-serpantinum-core watch sysinfo --interval 2   # a sample every 2 seconds until stopped
-serpantinum-core watch locks                  # Caps Lock and Num Lock, now and on every change
-serpantinum-core watch compositor             # Sway, Niri or Mango workspaces, windows and layout
-serpantinum-core watch brightness             # brightness in percent and its backend
-serpantinum-core watch network                # connectivity, IPv4 addresses and Wi-Fi frequencies
-serpantinum-core brightness set 40            # also get, raise, lower and backend
-serpantinum-core watch idle "$XDG_RUNTIME_DIR/serpantinum/lock/locked"
-serpantinum-core screentime track             # count screen time while running
-serpantinum-core screentime stats 2026-11-06  # a day's screen time statistics
-serpantinum-core launcher rank                # launcher scores from screen time and launches
-serpantinum-core launcher files notes         # files for the launcher's file search
-serpantinum-core monitors                     # outputs in use with their size and refresh rate
-serpantinum-core wallpaper index ~/Pictures/Wallpapers "$XDG_CACHE_HOME/serpantinum/wallpaper"
-serpantinum-core presets list "$XDG_STATE_HOME/serpantinum/presets" "$XDG_STATE_HOME/serpantinum/widgets"
-serpantinum-core system can-hibernate
-serpantinum-core clipboard list 0 12          # the newest 12 clipboard entries
-serpantinum-core clipboard pin 42
-serpantinum-core clipboard delete 42
-serpantinum-core clipboard wipe
-serpantinum-core notify --app Shot --action default=Open "Saved" "In ~/Pictures"
-serpantinum-core quit
+axshell-core start                        # the daemon, in the background
+axshell-core sysinfo                      # one sample
+axshell-core watch sysinfo --interval 2   # a sample every 2 seconds until stopped
+axshell-core watch locks                  # Caps Lock and Num Lock, now and on every change
+axshell-core watch compositor             # Sway, Niri or Mango workspaces, windows and layout
+axshell-core watch brightness             # brightness in percent and its backend
+axshell-core watch network                # connectivity, IPv4 addresses and Wi-Fi frequencies
+axshell-core brightness set 40            # also get, raise, lower and backend
+axshell-core watch idle "$XDG_RUNTIME_DIR/axshell/lock/locked"
+axshell-core screentime track             # count screen time while running
+axshell-core screentime stats 2026-11-06  # a day's screen time statistics
+axshell-core launcher rank                # launcher scores from screen time and launches
+axshell-core launcher files notes         # files for the launcher's file search
+axshell-core monitors                     # outputs in use with their size and refresh rate
+axshell-core wallpaper index ~/Pictures/Wallpapers "$XDG_CACHE_HOME/axshell/wallpaper"
+axshell-core presets list "$XDG_STATE_HOME/axshell/presets" "$XDG_STATE_HOME/axshell/widgets"
+axshell-core system can-hibernate
+axshell-core clipboard list 0 12          # the newest 12 clipboard entries
+axshell-core clipboard pin 42
+axshell-core clipboard delete 42
+axshell-core clipboard wipe
+axshell-core notify --app Shot --action default=Open "Saved" "In ~/Pictures"
+axshell-core quit
 ```
 
-`serpantinum-core --help` lists every command. Every command except `quit`, `notify`, `wallpaper` and `presets` starts
+`axshell-core --help` lists every command. Every command except `quit`, `notify`, `wallpaper` and `presets` starts
 the daemon when it is not running, and `watch` starts it again if it goes away.
 
 Feeds cost nothing while nobody watches them: the daemon samples only while a client holds a lease,
@@ -93,29 +93,29 @@ screenshots the old file used and the new one does not. `widgets` replaces the w
 
 The clipboard commands read the history from [cliphist](https://github.com/sentriz/cliphist), which
 must be installed. Decoded images and pins are kept in `--cache-dir`, by default
-`$XDG_CACHE_HOME/serpantinum/clipboard`.
+`$XDG_CACHE_HOME/axshell/clipboard`.
 
 ## D-Bus
 
-| Object       | Interface                        | Members                                                                                                         |
-|--------------|----------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| `/`          | `org.serpantinum.Core`           | `Quit()`, `Version`                                                                                             |
-| `/sysinfo`   | `org.serpantinum.Core.SysInfo`   | `Subscribe(u interval_ms)`, `Unsubscribe()`, `Cpu`, `RamPercent`, `RamGb`, `Temp`, `NetRx`, `NetTx`, `DiskPercent`, `DiskUsedGb`, `DiskTotalGb`, `Samples` |
-| `/locks`     | `org.serpantinum.Core.Locks`     | `Subscribe(u interval_ms)`, `Unsubscribe()`, `CapsLock`, `NumLock`                                              |
-| `/clipboard` | `org.serpantinum.Core.Clipboard` | `List(s cache_dir, u offset, u limit) → s`, `TogglePin(s cache_dir, s id)`, `Delete(s cache_dir, s id)`, `Wipe(s cache_dir)` |
-| `/compositor` | `org.serpantinum.Core.Compositor` | `Subscribe(a{ss} session)`, `Unsubscribe()`, `Name`, `Ready`, `Workspaces`, `Windows`, `Keyboard` (the last three JSON text) |
-| `/brightness` | `org.serpantinum.Core.Brightness` | `Subscribe()`, `Unsubscribe()`, `Get() → i`, `Set(u percent) → i`, `Step(b up) → i`, `Backend`, `Percent`, `Ready` |
-| `/idle` | `org.serpantinum.Core.Idle` | `Subscribe(s marker)`, `Unsubscribe()`, `SetSleepLock(b)`, `Inhibited`; signals `Sleep`, `Wake`, `Log(s)` |
-| `/network` | `org.serpantinum.Core.Network` | `Subscribe()`, `Unsubscribe()`, `Connectivity`, `Interfaces` (JSON text), `Ready` |
-| `/screentime` | `org.serpantinum.Core.ScreenTime` | `Subscribe(a{ss} env)`, `Unsubscribe()` |
-| `/org/freedesktop/ScreenSaver`, `/ScreenSaver` | `org.freedesktop.ScreenSaver` | `Inhibit`, `UnInhibit`, `SimulateUserActivity`, `GetActive`, while `watch idle` runs |
+| Object                                         | Interface                     | Members                                                                                                                                                    |
+|------------------------------------------------|-------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `/`                                            | `org.axshell.Core`            | `Quit()`, `Version`                                                                                                                                        |
+| `/sysinfo`                                     | `org.axshell.Core.SysInfo`    | `Subscribe(u interval_ms)`, `Unsubscribe()`, `Cpu`, `RamPercent`, `RamGb`, `Temp`, `NetRx`, `NetTx`, `DiskPercent`, `DiskUsedGb`, `DiskTotalGb`, `Samples` |
+| `/locks`                                       | `org.axshell.Core.Locks`      | `Subscribe(u interval_ms)`, `Unsubscribe()`, `CapsLock`, `NumLock`                                                                                         |
+| `/clipboard`                                   | `org.axshell.Core.Clipboard`  | `List(s cache_dir, u offset, u limit) → s`, `TogglePin(s cache_dir, s id)`, `Delete(s cache_dir, s id)`, `Wipe(s cache_dir)`                               |
+| `/compositor`                                  | `org.axshell.Core.Compositor` | `Subscribe(a{ss} session)`, `Unsubscribe()`, `Name`, `Ready`, `Workspaces`, `Windows`, `Keyboard` (the last three JSON text)                               |
+| `/brightness`                                  | `org.axshell.Core.Brightness` | `Subscribe()`, `Unsubscribe()`, `Get() → i`, `Set(u percent) → i`, `Step(b up) → i`, `Backend`, `Percent`, `Ready`                                         |
+| `/idle`                                        | `org.axshell.Core.Idle`       | `Subscribe(s marker)`, `Unsubscribe()`, `SetSleepLock(b)`, `Inhibited`; signals `Sleep`, `Wake`, `Log(s)`                                                  |
+| `/network`                                     | `org.axshell.Core.Network`    | `Subscribe()`, `Unsubscribe()`, `Connectivity`, `Interfaces` (JSON text), `Ready`                                                                          |
+| `/screentime`                                  | `org.axshell.Core.ScreenTime` | `Subscribe(a{ss} env)`, `Unsubscribe()`                                                                                                                    |
+| `/org/freedesktop/ScreenSaver`, `/ScreenSaver` | `org.freedesktop.ScreenSaver` | `Inhibit`, `UnInhibit`, `SimulateUserActivity`, `GetActive`, while `watch idle` runs                                                                       |
 
 Properties signal `PropertiesChanged`. `Samples` counts samples, so each sample signals a change
 even when the values stay the same.
 
 ```sh
-busctl --user call org.serpantinum.Core /sysinfo org.serpantinum.Core.SysInfo Subscribe u 1000
-busctl --user get-property org.serpantinum.Core /sysinfo org.serpantinum.Core.SysInfo Cpu
+busctl --user call org.axshell.Core /sysinfo org.axshell.Core.SysInfo Subscribe u 1000
+busctl --user get-property org.axshell.Core /sysinfo org.axshell.Core.SysInfo Cpu
 ```
 
 ## Building

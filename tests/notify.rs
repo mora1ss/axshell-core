@@ -1,7 +1,7 @@
 //! `notify` against a stand-in notification server on a private session bus, which the tests start
 //! with dbus-daemon. This is only how the tests get a bus: the command itself uses the user's session
 //! bus, whichever program runs it. Where dbus-daemon or notify-send is missing the tests that need
-//! it are skipped, unless SERPANTINUM_REQUIRE_DBUS is set, as it is in CI.
+//! it are skipped, unless AXSHELL_REQUIRE_DBUS is set, as it is in CI.
 
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader, Read};
@@ -61,7 +61,7 @@ impl Server {
     }
 
     fn get_server_information(&self) -> (String, String, String, String) {
-        ("mock".into(), "serpantinum".into(), "1".into(), "1.2".into())
+        ("mock".into(), "axshell".into(), "1".into(), "1.2".into())
     }
 
     fn close_notification(&self, _id: u32) {}
@@ -100,7 +100,7 @@ fn server(bus: &Bus, first: u32) -> (Connection, Inbox) {
 }
 
 fn client(bus: &Bus, args: &[&str]) -> Child {
-    let mut command = Command::new(env!("CARGO_BIN_EXE_serpantinum-core"));
+    let mut command = Command::new(env!("CARGO_BIN_EXE_axshell-core"));
     command.arg("notify").args(args);
     spawn(bus, command)
 }
@@ -157,7 +157,7 @@ macro_rules! need_bus {
         match bus() {
             Some(bus) => bus,
             None => {
-                assert!(std::env::var_os("SERPANTINUM_REQUIRE_DBUS").is_none(), "dbus-daemon is required");
+                assert!(std::env::var_os("AXSHELL_REQUIRE_DBUS").is_none(), "dbus-daemon is required");
                 eprintln!("no dbus-daemon, skipped");
                 return;
             }
@@ -308,7 +308,7 @@ fn libnotify_version() -> (u32, u32, u32) {
 fn matches_notify_send() {
     let bus = need_bus!();
     if Command::new("notify-send").arg("--version").output().is_err() {
-        assert!(std::env::var_os("SERPANTINUM_REQUIRE_DBUS").is_none(), "notify-send is required");
+        assert!(std::env::var_os("AXSHELL_REQUIRE_DBUS").is_none(), "notify-send is required");
         eprintln!("no notify-send, skipped");
         return;
     }
@@ -340,7 +340,7 @@ fn matches_notify_send() {
             eprintln!("this notify-send has no --action, skipped {ours:?}");
             continue;
         }
-        let mut our_program = Command::new(env!("CARGO_BIN_EXE_serpantinum-core"));
+        let mut our_program = Command::new(env!("CARGO_BIN_EXE_axshell-core"));
         our_program.arg("notify").args(*ours);
         let mut their_program = Command::new("notify-send");
         their_program.args(*theirs);
